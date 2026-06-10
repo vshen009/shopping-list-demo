@@ -20,3 +20,22 @@ export function validateItemInput({ name, quantity } = {}) {
 
   return { ok: true, value: { name: trimmed, quantity: qty } };
 }
+
+// PATCH 局部校验：只校验出现的字段，规则与 validateItemInput 完全一致
+export function validateItemPatch(patch = {}) {
+  const out = {};
+  if ('name' in patch) {
+    const result = validateItemInput({ name: patch.name });
+    if (!result.ok) return result;
+    out.name = result.value.name;
+  }
+  if ('quantity' in patch) {
+    const result = validateItemInput({ name: '占位', quantity: patch.quantity });
+    if (!result.ok) return result;
+    out.quantity = result.value.quantity;
+  }
+  if ('purchased' in patch) {
+    out.purchased = Boolean(patch.purchased);
+  }
+  return { ok: true, value: out };
+}

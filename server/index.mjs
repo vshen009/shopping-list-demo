@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createStore } from './db.mjs';
-import { validateItemInput } from './validation.mjs';
+import { validateItemInput, validateItemPatch } from './validation.mjs';
 
 const PUBLIC_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
@@ -43,7 +43,12 @@ export function createApp(store) {
   });
 
   app.patch('/api/items/:id', (req, res) => {
-    const item = store.update(Number(req.params.id), req.body ?? {});
+    const result = validateItemPatch(req.body ?? {});
+    if (!result.ok) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+    const item = store.update(Number(req.params.id), result.value);
     if (!item) {
       res.status(404).json({ error: '该清单项不存在' });
       return;

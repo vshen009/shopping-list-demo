@@ -153,6 +153,38 @@ describe('DELETE /api/items?purchased=true（清除已购）', () => {
   });
 });
 
+describe('PATCH /api/items/:id（行内编辑）', () => {
+  it('同时修改名称和数量返回 200，后续 GET 中生效', async () => {
+    const app = freshApp();
+    const created = await request(app).post('/api/items').send({ name: '牛奶' });
+    const res = await request(app)
+      .patch(`/api/items/${created.body.id}`)
+      .send({ name: '低脂牛奶', quantity: 2 });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ name: '低脂牛奶', quantity: 2 });
+    const list = await request(app).get('/api/items');
+    expect(list.body.find((i) => i.id === created.body.id)).toMatchObject({
+      name: '低脂牛奶',
+      quantity: 2,
+    });
+  });
+
+  it('名称 51 字符或数量 100 返回 400 和中文错误', async () => {
+    const app = freshApp();
+    const created = await request(app).post('/api/items').send({ name: '牛奶' });
+    const longName = await request(app)
+      .patch(`/api/items/${created.body.id}`)
+      .send({ name: '货'.repeat(51) });
+    expect(longName.status).toBe(400);
+    expect(longName.body.error).toMatch(/[一-龥]/);
+    const badQty = await request(app)
+      .patch(`/api/items/${created.body.id}`)
+      .send({ quantity: 100 });
+    expect(badQty.status).toBe(400);
+    expect(badQty.body.error).toMatch(/[一-龥]/);
+  });
+});
+
 describe('POST /api/items 输入校验', () => {
   it('空名称或纯空白名称返回 400 和中文错误', async () => {
     const app = freshApp();

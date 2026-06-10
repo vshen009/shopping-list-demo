@@ -89,6 +89,12 @@ function renderItem(item) {
   label.className = 'item-label';
   label.textContent = `${item.name} × ${item.quantity}`;
 
+  const editButton = document.createElement('button');
+  editButton.type = 'button';
+  editButton.className = 'edit-button';
+  editButton.textContent = '编辑';
+  editButton.addEventListener('click', () => enterEditMode(li, item));
+
   const deleteButton = document.createElement('button');
   deleteButton.type = 'button';
   deleteButton.className = 'delete-button';
@@ -98,8 +104,58 @@ function renderItem(item) {
     await loadItems();
   });
 
-  li.append(checkbox, label, deleteButton);
+  li.append(checkbox, label, editButton, deleteButton);
   return li;
+}
+
+// 行内编辑态：名称/数量输入框 + 保存/取消；校验失败行内报错并保持编辑态
+function enterEditMode(li, item) {
+  li.classList.add('editing');
+  li.innerHTML = '';
+
+  const nameField = document.createElement('input');
+  nameField.type = 'text';
+  nameField.className = 'edit-name';
+  nameField.value = item.name;
+
+  const quantityField = document.createElement('input');
+  quantityField.type = 'number';
+  quantityField.className = 'edit-quantity';
+  quantityField.value = item.quantity;
+
+  const saveButton = document.createElement('button');
+  saveButton.type = 'button';
+  saveButton.className = 'save-button';
+  saveButton.textContent = '保存';
+
+  const cancelButton = document.createElement('button');
+  cancelButton.type = 'button';
+  cancelButton.className = 'cancel-button';
+  cancelButton.textContent = '取消';
+
+  const errorEl = document.createElement('span');
+  errorEl.className = 'edit-error';
+  errorEl.hidden = true;
+
+  saveButton.addEventListener('click', async () => {
+    const res = await fetch(`/api/items/${item.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: nameField.value, quantity: Number(quantityField.value) }),
+    });
+    if (res.ok) {
+      await loadItems();
+    } else {
+      const body = await res.json().catch(() => ({}));
+      errorEl.textContent = body.error || '保存失败，请重试';
+      errorEl.hidden = false;
+    }
+  });
+
+  cancelButton.addEventListener('click', () => loadItems());
+
+  li.append(nameField, quantityField, saveButton, cancelButton, errorEl);
+  nameField.focus();
 }
 
 loadItems();

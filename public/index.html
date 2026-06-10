@@ -43,11 +43,46 @@
     }
     #empty-state .emoji { font-size: 40px; display: block; margin-bottom: 8px; }
     #item-list { list-style: none; margin: 0; padding: 0; }
+    #add-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    #add-form input {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 15px;
+    }
+    #name-input { flex: 1; min-width: 0; }
+    #quantity-input { width: 72px; }
+    #add-button {
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .item-row:last-child { border-bottom: none; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>🛒 购物清单</h1>
+    <form id="add-form">
+      <input id="name-input" type="text" placeholder="要买什么？" autocomplete="off" />
+      <input id="quantity-input" type="number" value="1" min="1" aria-label="数量" />
+      <button id="add-button" type="submit">添加</button>
+    </form>
     <div class="card">
       <ul id="item-list"></ul>
       <div id="empty-state" hidden>

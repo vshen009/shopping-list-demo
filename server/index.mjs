@@ -15,6 +15,12 @@ export function createApp(store) {
     res.json(store.list());
   });
 
+  app.post('/api/items', (req, res) => {
+    const { name, quantity } = req.body ?? {};
+    const item = store.add(name, quantity ?? 1);
+    res.status(201).json(item);
+  });
+
   return app;
 }
 

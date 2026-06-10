@@ -26,6 +26,14 @@ export function createApp(store) {
     res.status(201).json(item);
   });
 
+  app.delete('/api/items/:id', (req, res) => {
+    if (!store.remove(Number(req.params.id))) {
+      res.status(404).json({ error: '该清单项不存在' });
+      return;
+    }
+    res.status(204).end();
+  });
+
   app.patch('/api/items/:id', (req, res) => {
     const item = store.update(Number(req.params.id), req.body ?? {});
     if (!item) {

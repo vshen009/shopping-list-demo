@@ -79,6 +79,18 @@
       text-decoration: line-through;
       color: var(--muted);
     }
+    #form-error {
+      color: var(--danger);
+      font-size: 14px;
+      margin: -8px 0 12px;
+    }
+    @media (max-width: 480px) {
+      .container { padding: 16px 12px; }
+      #add-form { flex-wrap: wrap; }
+      #name-input { flex: 1 1 100%; }
+      #quantity-input { flex: 1; width: auto; }
+      #add-button { flex: 2; }
+    }
   </style>
 </head>
 <body>
@@ -86,9 +98,10 @@
     <h1>🛒 购物清单</h1>
     <form id="add-form">
       <input id="name-input" type="text" placeholder="要买什么？" autocomplete="off" />
-      <input id="quantity-input" type="number" value="1" min="1" aria-label="数量" />
+      <input id="quantity-input" type="number" value="1" min="1" max="99" aria-label="数量" />
       <button id="add-button" type="submit">添加</button>
     </form>
+    <p id="form-error" role="alert" hidden></p>
     <div class="card">
       <ul id="item-list"></ul>
       <div id="empty-state" hidden>

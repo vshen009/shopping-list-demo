@@ -5,6 +5,13 @@ const formEl = document.getElementById('add-form');
 const nameInput = document.getElementById('name-input');
 const quantityInput = document.getElementById('quantity-input');
 
+const formErrorEl = document.getElementById('form-error');
+
+function showFormError(message) {
+  formErrorEl.textContent = message;
+  formErrorEl.hidden = !message;
+}
+
 formEl.addEventListener('submit', async (e) => {
   e.preventDefault();
   const res = await fetch('/api/items', {
@@ -13,10 +20,14 @@ formEl.addEventListener('submit', async (e) => {
     body: JSON.stringify({ name: nameInput.value, quantity: Number(quantityInput.value) || 1 }),
   });
   if (res.ok) {
+    showFormError('');
     nameInput.value = '';
     quantityInput.value = '1';
     nameInput.focus();
     await loadItems();
+  } else {
+    const body = await res.json().catch(() => ({}));
+    showFormError(body.error || '添加失败，请重试');
   }
 });
 

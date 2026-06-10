@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createStore } from './db.mjs';
+import { validateItemInput } from './validation.mjs';
 
 const PUBLIC_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
@@ -16,8 +17,12 @@ export function createApp(store) {
   });
 
   app.post('/api/items', (req, res) => {
-    const { name, quantity } = req.body ?? {};
-    const item = store.add(name, quantity ?? 1);
+    const result = validateItemInput(req.body ?? {});
+    if (!result.ok) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+    const item = store.add(result.value.name, result.value.quantity);
     res.status(201).json(item);
   });
 

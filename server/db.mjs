@@ -50,5 +50,10 @@ export function createStore(dbPath) {
       );
       return rowToItem(db.prepare('SELECT * FROM items WHERE id = ?').get(id));
     },
+
+    // 删除单项：成功返回 true，id 不存在返回 false
+    remove(id) {
+      return db.prepare('DELETE FROM items WHERE id = ?').run(id).changes > 0;
+    },
   };
 }

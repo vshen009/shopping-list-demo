@@ -68,7 +68,16 @@ function renderItem(item) {
   label.className = 'item-label';
   label.textContent = `${item.name} × ${item.quantity}`;
 
-  li.append(checkbox, label);
+  const deleteButton = document.createElement('button');
+  deleteButton.type = 'button';
+  deleteButton.className = 'delete-button';
+  deleteButton.textContent = '删除';
+  deleteButton.addEventListener('click', async () => {
+    await fetch(`/api/items/${item.id}`, { method: 'DELETE' });
+    await loadItems();
+  });
+
+  li.append(checkbox, label, deleteButton);
   return li;
 }
 

@@ -90,6 +90,23 @@ describe('PATCH /api/items/:id（勾选已购）', () => {
   });
 });
 
+describe('DELETE /api/items/:id（删除清单项）', () => {
+  it('删除成功返回 204，该项从后续 GET 中消失', async () => {
+    const app = freshApp();
+    const created = await request(app).post('/api/items').send({ name: '牛奶' });
+    const res = await request(app).delete(`/api/items/${created.body.id}`);
+    expect(res.status).toBe(204);
+    const list = await request(app).get('/api/items');
+    expect(list.body.find((i) => i.id === created.body.id)).toBeUndefined();
+  });
+
+  it('删除不存在的 id 返回 404 和中文错误', async () => {
+    const res = await request(freshApp()).delete('/api/items/999');
+    expect(res.status).toBe(404);
+    expect(res.body.error).toMatch(/[一-龥]/);
+  });
+});
+
 describe('POST /api/items 输入校验', () => {
   it('空名称或纯空白名称返回 400 和中文错误', async () => {
     const app = freshApp();

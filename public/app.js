@@ -1,6 +1,24 @@
 // 购物清单前端：拉取清单并渲染；空清单显示空状态
 const listEl = document.getElementById('item-list');
 const emptyEl = document.getElementById('empty-state');
+const formEl = document.getElementById('add-form');
+const nameInput = document.getElementById('name-input');
+const quantityInput = document.getElementById('quantity-input');
+
+formEl.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const res = await fetch('/api/items', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: nameInput.value, quantity: Number(quantityInput.value) || 1 }),
+  });
+  if (res.ok) {
+    nameInput.value = '';
+    quantityInput.value = '1';
+    nameInput.focus();
+    await loadItems();
+  }
+});
 
 async function loadItems() {
   const res = await fetch('/api/items');

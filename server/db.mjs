@@ -25,5 +25,12 @@ export function createStore(dbPath) {
     list() {
       return db.prepare(`SELECT * FROM items ${ORDER_BY}`).all().map(rowToItem);
     },
+
+    add(name, quantity = 1) {
+      const { lastInsertRowid } = db
+        .prepare('INSERT INTO items (name, quantity) VALUES (?, ?)')
+        .run(name, quantity);
+      return rowToItem(db.prepare('SELECT * FROM items WHERE id = ?').get(lastInsertRowid));
+    },
   };
 }

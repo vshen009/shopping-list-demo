@@ -89,3 +89,35 @@ describe('PATCH /api/items/:id（勾选已购）', () => {
     expect(res.body.error).toMatch(/[一-龥]/);
   });
 });
+
+describe('POST /api/items 输入校验', () => {
+  it('空名称或纯空白名称返回 400 和中文错误', async () => {
+    const app = freshApp();
+    for (const name of ['', '   ']) {
+      const res = await request(app).post('/api/items').send({ name });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/[一-龥]/);
+    }
+  });
+
+  it('名称 51 字符返回 400；50 字符成功创建', async () => {
+    const app = freshApp();
+    const tooLong = await request(app).post('/api/items').send({ name: '货'.repeat(51) });
+    expect(tooLong.status).toBe(400);
+    const ok = await request(app).post('/api/items').send({ name: '货'.repeat(50) });
+    expect(ok.status).toBe(201);
+  });
+
+  it('数量 0、100、非整数返回 400；1 和 99 成功', async () => {
+    const app = freshApp();
+    for (const quantity of [0, 100, 2.5]) {
+      const res = await request(app).post('/api/items').send({ name: '牛奶', quantity });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/[一-龥]/);
+    }
+    for (const quantity of [1, 99]) {
+      const res = await request(app).post('/api/items').send({ name: '牛奶', quantity });
+      expect(res.status).toBe(201);
+    }
+  });
+});

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>购物清单</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1f2329;
+      --muted: #8a919c;
+      --accent: #16a34a;
+      --danger: #dc2626;
+      --border: #e5e8ec;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+    h1 {
+      font-size: 22px;
+      margin: 0 0 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    #empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 0;
+    }
+    #empty-state .emoji { font-size: 40px; display: block; margin-bottom: 8px; }
+    #item-list { list-style: none; margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🛒 购物清单</h1>
+    <div class="card">
+      <ul id="item-list"></ul>
+      <div id="empty-state" hidden>
+        <span class="emoji">🧺</span>
+        清单是空的，添加第一项吧
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

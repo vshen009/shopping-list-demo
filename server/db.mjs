@@ -22,8 +22,16 @@ export function createStore(dbPath) {
   const rowToItem = (row) => ({ ...row, purchased: Boolean(row.purchased) });
 
   return {
-    list() {
-      return db.prepare(`SELECT * FROM items ${ORDER_BY}`).all().map(rowToItem);
+    // filter: 'all'（默认）| 'active' 待购 | 'purchased' 已购
+    list(filter = 'all') {
+      const where =
+        filter === 'active' ? 'WHERE purchased = 0' : filter === 'purchased' ? 'WHERE purchased = 1' : '';
+      return db.prepare(`SELECT * FROM items ${where} ${ORDER_BY}`).all().map(rowToItem);
+    },
+
+    // 批量删除全部已购项，返回删除条数
+    clearPurchased() {
+      return db.prepare('DELETE FROM items WHERE purchased = 1').run().changes;
     },
 
     add(name, quantity = 1) {

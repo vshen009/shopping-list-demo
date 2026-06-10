@@ -13,7 +13,15 @@ export function createApp(store) {
   app.use(express.static(PUBLIC_DIR));
 
   app.get('/api/items', (req, res) => {
-    res.json(store.list());
+    res.json(store.list(req.query.filter));
+  });
+
+  app.delete('/api/items', (req, res) => {
+    if (req.query.purchased !== 'true') {
+      res.status(400).json({ error: '批量删除必须指定 purchased=true' });
+      return;
+    }
+    res.json({ deleted: store.clearPurchased() });
   });
 
   app.post('/api/items', (req, res) => {

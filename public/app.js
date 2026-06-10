@@ -31,10 +31,31 @@ formEl.addEventListener('submit', async (e) => {
   }
 });
 
+const summaryEl = document.getElementById('summary');
+let currentFilter = 'all';
+
+document.querySelectorAll('.filter-tab').forEach((tab) => {
+  tab.addEventListener('click', async () => {
+    currentFilter = tab.dataset.filter;
+    document.querySelectorAll('.filter-tab').forEach((t) => t.classList.toggle('active', t === tab));
+    await loadItems();
+  });
+});
+
+document.getElementById('clear-purchased').addEventListener('click', async () => {
+  await fetch('/api/items?purchased=true', { method: 'DELETE' });
+  await loadItems();
+});
+
 async function loadItems() {
-  const res = await fetch('/api/items');
-  const items = await res.json();
-  render(items);
+  // 行内容按当前标签页向服务端取；统计始终基于全量
+  const [filtered, all] = await Promise.all([
+    fetch(`/api/items?filter=${currentFilter}`).then((r) => r.json()),
+    fetch('/api/items').then((r) => r.json()),
+  ]);
+  render(filtered);
+  const purchasedCount = all.filter((i) => i.purchased).length;
+  summaryEl.textContent = `共 ${all.length} 项 · 已购 ${purchasedCount} 项`;
 }
 
 function render(items) {

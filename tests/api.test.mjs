@@ -107,6 +107,52 @@ describe('DELETE /api/items/:id（删除清单项）', () => {
   });
 });
 
+describe('GET /api/items?filter=（筛选）', () => {
+  async function seeded() {
+    const app = freshApp();
+    await request(app).post('/api/items').send({ name: '牛奶' });
+    const apple = await request(app).post('/api/items').send({ name: '苹果' });
+    await request(app).patch(`/api/items/${apple.body.id}`).send({ purchased: true });
+    return app;
+  }
+
+  it('?filter=active 只返回待购项', async () => {
+    const res = await request(await seeded()).get('/api/items?filter=active');
+    expect(res.body.map((i) => i.name)).toEqual(['牛奶']);
+  });
+
+  it('?filter=purchased 只返回已购项', async () => {
+    const res = await request(await seeded()).get('/api/items?filter=purchased');
+    expect(res.body.map((i) => i.name)).toEqual(['苹果']);
+  });
+
+  it('省略 filter 或 filter=all 返回全部', async () => {
+    const app = await seeded();
+    const all = await request(app).get('/api/items');
+    expect(all.body).toHaveLength(2);
+    const explicit = await request(app).get('/api/items?filter=all');
+    expect(explicit.body).toHaveLength(2);
+  });
+});
+
+describe('DELETE /api/items?purchased=true（清除已购）', () => {
+  it('批量清除返回 200 和 deleted 数量，已购项消失、待购项保留', async () => {
+    const app = freshApp();
+    await request(app).post('/api/items').send({ name: '牛奶' });
+    const apple = await request(app).post('/api/items').send({ name: '苹果' });
+    const bread = await request(app).post('/api/items').send({ name: '面包' });
+    await request(app).patch(`/api/items/${apple.body.id}`).send({ purchased: true });
+    await request(app).patch(`/api/items/${bread.body.id}`).send({ purchased: true });
+
+    const res = await request(app).delete('/api/items?purchased=true');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ deleted: 2 });
+
+    const list = await request(app).get('/api/items');
+    expect(list.body.map((i) => i.name)).toEqual(['牛奶']);
+  });
+});
+
 describe('POST /api/items 输入校验', () => {
   it('空名称或纯空白名称返回 400 和中文错误', async () => {
     const app = freshApp();

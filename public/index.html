@@ -79,6 +79,40 @@
       text-decoration: line-through;
       color: var(--muted);
     }
+    #toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    #filter-tabs { display: flex; gap: 4px; }
+    .filter-tab {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .filter-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    #summary {
+      flex: 1;
+      text-align: right;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    #clear-purchased {
+      border: none;
+      background: none;
+      color: var(--danger);
+      font-size: 13px;
+      cursor: pointer;
+    }
     .delete-button {
       border: none;
       background: none;
@@ -110,6 +144,15 @@
       <button id="add-button" type="submit">添加</button>
     </form>
     <p id="form-error" role="alert" hidden></p>
+    <div id="toolbar">
+      <nav id="filter-tabs">
+        <button type="button" class="filter-tab active" data-filter="all">全部</button>
+        <button type="button" class="filter-tab" data-filter="active">待购</button>
+        <button type="button" class="filter-tab" data-filter="purchased">已购</button>
+      </nav>
+      <span id="summary"></span>
+      <button type="button" id="clear-purchased">清除已购</button>
+    </div>
     <div class="card">
       <ul id="item-list"></ul>
       <div id="empty-state" hidden>

@@ -58,3 +58,34 @@ describe('POST /api/items（添加清单项）', () => {
     expect(list.body.map((i) => i.name)).toEqual(['苹果', '面包']);
   });
 });
+
+describe('PATCH /api/items/:id（勾选已购）', () => {
+  it('传 purchased: true 返回 200 和更新后的 item，后续 GET 中生效', async () => {
+    const app = freshApp();
+    const created = await request(app).post('/api/items').send({ name: '牛奶' });
+    const res = await request(app)
+      .patch(`/api/items/${created.body.id}`)
+      .send({ purchased: true });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ id: created.body.id, name: '牛奶', purchased: true });
+    const list = await request(app).get('/api/items');
+    expect(list.body.find((i) => i.id === created.body.id).purchased).toBe(true);
+  });
+
+  it('已购项在 GET 返回顺序中排在所有待购项之后（沉底）', async () => {
+    const app = freshApp();
+    await request(app).post('/api/items').send({ name: '牛奶' });
+    const apple = await request(app).post('/api/items').send({ name: '苹果' });
+    await request(app).patch(`/api/items/${apple.body.id}`).send({ purchased: true });
+    await request(app).post('/api/items').send({ name: '面包' });
+    // 按时间序苹果应在牛奶前；沉底后苹果必须排到所有待购项之后
+    const list = await request(app).get('/api/items');
+    expect(list.body.map((i) => i.name)).toEqual(['面包', '牛奶', '苹果']);
+  });
+
+  it('PATCH 不存在的 id 返回 404 和中文错误', async () => {
+    const res = await request(freshApp()).patch('/api/items/999').send({ purchased: true });
+    expect(res.status).toBe(404);
+    expect(res.body.error).toMatch(/[一-龥]/);
+  });
+});

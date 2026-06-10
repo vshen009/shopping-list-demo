@@ -38,7 +38,26 @@ function renderItem(item) {
   const li = document.createElement('li');
   li.className = 'item-row' + (item.purchased ? ' purchased' : '');
   li.dataset.id = item.id;
-  li.textContent = `${item.name} × ${item.quantity}`;
+
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.className = 'purchased-toggle';
+  checkbox.checked = item.purchased;
+  checkbox.setAttribute('aria-label', '已购');
+  checkbox.addEventListener('change', async () => {
+    await fetch(`/api/items/${item.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ purchased: checkbox.checked }),
+    });
+    await loadItems();
+  });
+
+  const label = document.createElement('span');
+  label.className = 'item-label';
+  label.textContent = `${item.name} × ${item.quantity}`;
+
+  li.append(checkbox, label);
   return li;
 }
 

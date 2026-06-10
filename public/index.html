@@ -73,6 +73,12 @@
       border-bottom: 1px solid var(--border);
     }
     .item-row:last-child { border-bottom: none; }
+    .purchased-toggle { width: 18px; height: 18px; accent-color: var(--accent); }
+    .item-label { flex: 1; }
+    .item-row.purchased .item-label {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>

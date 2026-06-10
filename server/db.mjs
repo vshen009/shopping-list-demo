@@ -32,5 +32,23 @@ export function createStore(dbPath) {
         .run(name, quantity);
       return rowToItem(db.prepare('SELECT * FROM items WHERE id = ?').get(lastInsertRowid));
     },
+
+    // 局部更新：只更新 patch 中出现的字段；id 不存在返回 null
+    update(id, patch) {
+      const existing = db.prepare('SELECT * FROM items WHERE id = ?').get(id);
+      if (!existing) return null;
+      const next = {
+        name: patch.name ?? existing.name,
+        quantity: patch.quantity ?? existing.quantity,
+        purchased: patch.purchased === undefined ? existing.purchased : Number(patch.purchased),
+      };
+      db.prepare('UPDATE items SET name = ?, quantity = ?, purchased = ? WHERE id = ?').run(
+        next.name,
+        next.quantity,
+        next.purchased,
+        id,
+      );
+      return rowToItem(db.prepare('SELECT * FROM items WHERE id = ?').get(id));
+    },
   };
 }

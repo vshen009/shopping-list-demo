@@ -21,6 +21,15 @@ export function createApp(store) {
     res.status(201).json(item);
   });
 
+  app.patch('/api/items/:id', (req, res) => {
+    const item = store.update(Number(req.params.id), req.body ?? {});
+    if (!item) {
+      res.status(404).json({ error: '该清单项不存在' });
+      return;
+    }
+    res.json(item);
+  });
+
   return app;
 }
 
